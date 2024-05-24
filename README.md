@@ -35,7 +35,7 @@ The setup of the pipeline consists of the modifying the `config.yaml`, setting t
 
 This pipeline requires a [conda package manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and [bioconda](https://bioconda.github.io/). In addition, of course, it is essential to install [Snakemake](https://snakemake.readthedocs.io/en/stable/index.html); in this case, it has been decided to install it in a Mamba environment. 
 
-> Snakemake environment allows working with a fixed version and avoids possible issues when re-running the pipeline after a software update.
+> Snakemake environment allows working with a fixed version and avoids possible issues when re-running the pipeline after general software updates.
 
 ```shell
 mamba env create -f envs/snakemake_visor.yaml
