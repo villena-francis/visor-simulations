@@ -1,3 +1,7 @@
+rule all:
+    input:
+        expand(f"{OUTDIR}/{{stage}}LASeR", stage = STAGE_LIST)
+
 rule get_genome:
     output:
         f"{RESDIR}/{GENOME}"
