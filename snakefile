@@ -44,3 +44,19 @@ rule visor_hack:
     shell:"""
         VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} -o {output.folder}
     """
+
+rule generate_bed:
+    input:
+        rules.visor_hack.output.h1_fa,
+        rules.visor_hack.output.h2_fa,
+        rules.visor_hack.output.h1_fa_fai,
+        rules.visor_hack.output.h2_fa_fai,
+    output:
+        f"{OUTDIR}/{{stage}}HACk/laser.simple.bed"
+    log:
+        f"{LOGDIR}/generate_bed/{{stage}}.log"
+    benchmark:
+        f"{LOGDIR}/generate_bed/{{stage}}.bmk"
+    shell:"""
+        sh scripts/makeBED.sh {CHR} {wildcards.stage}
+    """   
