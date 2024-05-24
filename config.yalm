@@ -1,0 +1,15 @@
+datadir: 'data'
+
+# Here you can specify the name of one or more directories with the stages you want to simulate:
+stage_list: ['trial']
+
+outdir: 'out'
+
+logdir: 'log'
+
+get_genome:
+    file: "GRCh38.primary_assembly.genome.fa"
+    file_url: "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz"
+    res_dir: "res"
+
+chr: 'chr22'

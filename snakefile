@@ -1,3 +1,21 @@
+# PARAMETERS
+
+configfile: "config.yaml"
+
+## Directories
+DATADIR = config['datadir']
+OUTDIR = config['outdir']
+LOGDIR = config['logdir']
+RESDIR = config['get_genome']['res_dir']
+
+## Imput resources
+GENOME = config['get_genome']['file']
+CHR = config['chr']
+URL = config['get_genome']['file_url']
+STAGE_LIST = config['stage_list']
+
+# RULES
+
 rule all:
     input:
         expand(f"{OUTDIR}/{{stage}}LASeR", stage = STAGE_LIST)
