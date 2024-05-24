@@ -14,3 +14,15 @@ mamba activate visor_test
 #execute the pipeline for stage "test"
 bash scripts/trial_test.sh test
 ```
+# Snakemake pipeline
+
+## Setup 
+
+The setup of the pipeline consists of the modifying the `config.yaml`, setting the reference genome, the MM stages to simulate and the location of the output reads.
+
+> **Pending expansion:** The methodology and instructions for generating the inputs of MM stages will be included soon.
+
+### Input files
+
+* **reference genome** to insert the SVs
+* **stage(s) folder(s)** with **.bam files** that contain the instructions to recreate the SVs
