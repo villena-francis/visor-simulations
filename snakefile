@@ -60,3 +60,26 @@ rule generate_bed:
     shell:"""
         sh scripts/makeBED.sh {CHR} {wildcards.stage}
     """   
+
+rule visor_laser:
+    input:
+        fasta = f"{RESDIR}/{CHR}.fa",
+        hack_output = f"{OUTDIR}/{{stage}}HACk",
+        bed = f"{OUTDIR}/{{stage}}HACk/laser.simple.bed"
+    output:
+        directory(f"{OUTDIR}/{{stage}}LASeR")
+    log:
+        f"{LOGDIR}/visor_laser/{{stage}}.log"
+    benchmark:
+        f"{LOGDIR}/run_visor_laser/{{stage}}.bmk"
+    conda:
+        "envs/visor.yaml"
+    params:
+        threads = 10,
+        coverage = 1,
+        read_type = "nanopore"
+    shell:"""
+        VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
+        -o {output} --threads {params.threads} --coverage {params.coverage} \
+        --fastq --read_type {params.read_type}
+    """
