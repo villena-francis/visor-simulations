@@ -8,7 +8,7 @@ OUTDIR = config['outdir']
 LOGDIR = config['logdir']
 RESDIR = config['get_genome']['res_dir']
 
-## Imput resources
+## Resources
 GENOME = config['get_genome']['file']
 CHR = config['chr']
 URL = config['get_genome']['file_url']
@@ -28,7 +28,7 @@ rule get_genome:
     benchmark:
         f"{LOGDIR}/get_genome/{GENOME}.bmk"
     shell:"""
-        sh scripts/download.sh {URL} {RESDIR}
+        sh scripts/download.sh {URL} {RESDIR} 2>&1 | tee {log}
         """
 
 rule extract_chromosome_fasta:
@@ -43,7 +43,7 @@ rule extract_chromosome_fasta:
     conda:
         "envs/samtools.yaml"
     shell:"""
-        samtools faidx {input} {CHR} > {output}
+        samtools faidx {input} {CHR} > {output} 2>&1 | tee {log}
     """
 
 rule visor_hack:
@@ -64,7 +64,8 @@ rule visor_hack:
     conda:
         "envs/visor.yaml"
     shell:"""
-        VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} -o {output.folder}
+        VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} \
+        -o {output.folder} 2>&1 | tee {log}
     """
 
 rule generate_bed:
@@ -80,7 +81,7 @@ rule generate_bed:
     benchmark:
         f"{LOGDIR}/generate_bed/{{stage}}.bmk"
     shell:"""
-        sh scripts/makeBED.sh {CHR} {wildcards.stage}
+        sh scripts/makeBED.sh {CHR} {wildcards.stage} 2>&1 | tee {log}
     """   
 
 rule visor_laser:
@@ -103,5 +104,5 @@ rule visor_laser:
     shell:"""
         VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
         -o {output} --threads {params.threads} --coverage {params.coverage} \
-        --fastq --read_type {params.read_type}
+        --fastq --read_type {params.read_type} 2>&1 | tee {log}
     """
