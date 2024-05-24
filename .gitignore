@@ -1,0 +1,9 @@
+out/*
+!out/.gitkeep
+
+res/*
+!res/url
+
+log/*
+!log/.gitkeep
+
