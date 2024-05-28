@@ -1,0 +1,101 @@
+
+configfile: "config/config.yalm"
+
+## Resources
+STAGE_LIST = config['stage_list']
+GENOME_URL = config['genome_url']
+GENOME_FILE = config['genome_file']
+CHR = config['chr']
+
+# RULES
+
+rule all:
+    input:
+        expand(f"results/{{stage}}LASeR", stage = STAGE_LIST)
+
+rule get_genome:
+    output:
+        f"resources/genome/{GENOME_FILE}"
+    log:
+        f"results/log/get_genome/{GENOME_FILE}.log"
+    benchmark:
+        f"results/log/get_genome/{GENOME_FILE}.bmk"
+    shell:"""
+        sh workflow/scripts/download.sh {GENOME_URL} resources/genome 2>&1 | tee {log}
+        """
+
+rule extract_chromosome_fasta:
+    input:
+        f"resources/genome/{GENOME_FILE}"
+    output:
+        f"resources/genome/{CHR}.fa"
+    log:
+        f"results/log/extract_fasta/{GENOME_FILE}.log"
+    benchmark:
+        f"results/log/extract_fasta/{GENOME_FILE}.bmk"
+    conda:
+        "envs/samtools.yaml"
+    shell:"""
+        samtools faidx {input} {CHR} > {output} 2>&1 | tee {log}
+    """
+
+rule visor_hack:
+    input:
+        fasta = f"resources/genome/{CHR}.fa",
+        bed1 = f"resources/{{stage}}/HACk.h1.bed",
+        bed2 = f"resources/{{stage}}/HACk.h2.bed"
+    output:
+        h1_fa = f"results/{{stage}}HACk/h1.fa",
+        h1_fa_fai = f"results/{{stage}}HACk/h1.fa.fai",
+        h2_fa = f"results/{{stage}}HACk/h2.fa",
+        h2_fa_fai = f"results/{{stage}}HACk/h2.fa.fai",
+        folder = directory(f"results/{{stage}}HACk")
+    log:
+        f"results/log/visor_hack/{{stage}}.log"
+    benchmark:
+        f"results/log/visor_hack/{{stage}}.bmk"
+    conda:
+        "envs/visor.yaml"
+    shell:"""
+        VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} \
+        -o {output.folder} 2>&1 | tee {log}
+    """
+
+rule generate_bed:
+    input:
+        rules.visor_hack.output.h1_fa,
+        rules.visor_hack.output.h2_fa,
+        rules.visor_hack.output.h1_fa_fai,
+        rules.visor_hack.output.h2_fa_fai,
+    output:
+        f"results/{{stage}}HACk/laser.simple.bed"
+    log:
+        f"results/log/generate_bed/{{stage}}.log"
+    benchmark:
+        f"results/log/generate_bed/{{stage}}.bmk"
+    shell:"""
+        sh workflow/scripts/makeBED.sh {CHR} {wildcards.stage} 2>&1 | tee {log}
+    """   
+
+rule visor_laser:
+    input:
+        fasta = f"resources/genome/{CHR}.fa",
+        hack_output = f"results/{{stage}}HACk",
+        bed = f"results/{{stage}}HACk/laser.simple.bed"
+    output:
+        directory(f"results/{{stage}}LASeR")
+    log:
+        f"results/log/visor_laser/{{stage}}.log"
+    benchmark:
+        f"results/log/run_visor_laser/{{stage}}.bmk"
+    conda:
+        "envs/visor.yaml"
+    params:
+        threads = 10,
+        coverage = 1,
+        read_type = "nanopore"
+    shell:"""
+        VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
+        -o {output} --threads {params.threads} --coverage {params.coverage} \
+        --fastq --read_type {params.read_type} 2>&1 | tee {log}
+    """

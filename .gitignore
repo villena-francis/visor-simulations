@@ -1,9 +1,13 @@
-out/*
-!out/.gitkeep
+resources/**
+!resources/genome/
+resources/genome/**
+!resources/genome/url
+!resources/trial/
+!resources/trial/**
 
-res/*
-!res/url
+results/**
+!results/log/
+results/log/**
+!results/log/.gitkeep
 
-log/*
-!log/.gitkeep
-
+.snakemake
