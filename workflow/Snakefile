@@ -1,5 +1,5 @@
 
-configfile: "config/config.yalm"
+configfile: "config/config.yaml"
 
 ## Resources
 STAGE_LIST = config['stage_list']
@@ -11,7 +11,7 @@ CHR = config['chr']
 
 rule all:
     input:
-        expand(f"results/{{stage}}LASeR", stage = STAGE_LIST)
+        [f"results/{stage}LASeR" for stage in STAGE_LIST]
 
 rule get_genome:
     output:
