@@ -6,15 +6,15 @@ This repository is used for exploratory analyses with [VISOR](https://github.com
 
 The `trial_test.sh` was created to better understand how the HACk and LASeR modules of VISOR work.
 
-Each stage of MM is represented by a specific folder in `data`. These folders contain .bed files that provide the necessary [instructions to insert the SVs](https://davidebolo1993.github.io/visordoc/usage/usage.html#visor-hack) into the reference genome. For this trial the only stage aviable is `data/test`.
+Each stage of MM is represented by a specific folder in `resources`. These folders contain .bed files that provide the necessary [instructions to insert the SVs](https://davidebolo1993.github.io/visordoc/usage/usage.html#visor-hack) into the reference genome, wich is located in `genome`. For this trial, the only stage aviable is `test`.
 
 ```shell
 #create the environment
-mamba env create -f envs/visor_test.yaml
+mamba env create -f workflow/envs/visor_test.yaml
 #activate the environment
 mamba activate visor_test
 #execute the pipeline for stage "test"
-bash scripts/trial_test.sh test
+bash workflow/scripts/trial_test.sh test
 ```
 # Snakemake pipeline
 
@@ -38,7 +38,7 @@ This pipeline requires a [conda package manager](https://docs.conda.io/projects/
 > Snakemake environment allows working with a fixed version and avoids possible issues when re-running the pipeline after general software updates.
 
 ```shell
-mamba env create -f envs/snakemake_visor.yaml
+mamba env create -f workflow/envs/snakemake_visor.yaml
 ```
 
 ### 2. Download pipeline repository from GitHub
