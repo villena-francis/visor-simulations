@@ -5,7 +5,6 @@ configfile: "config/config.yaml"
 STAGE_LIST = config['stage_list']
 GENOME_URL = config['genome_url']
 GENOME_FILE = config['genome_file']
-CHR = config['chr']
 
 # RULES
 
@@ -22,26 +21,11 @@ rule get_genome:
         f"results/log/get_genome/{GENOME_FILE}.bmk"
     shell:"""
         sh workflow/scripts/download.sh {GENOME_URL} resources/genome 2>&1 | tee {log}
-        """
-
-rule extract_chromosome_fasta:
-    input:
-        f"resources/genome/{GENOME_FILE}"
-    output:
-        f"resources/genome/{CHR}.fa"
-    log:
-        f"results/log/extract_fasta/{GENOME_FILE}.log"
-    benchmark:
-        f"results/log/extract_fasta/{GENOME_FILE}.bmk"
-    conda:
-        "envs/samtools.yaml"
-    shell:"""
-        samtools faidx {input} {CHR} > {output} 2>&1 | tee {log}
     """
 
 rule visor_hack:
     input:
-        fasta = f"resources/genome/{CHR}.fa",
+        fasta = f"resources/genome/{GENOME_FILE}",
         bed1 = f"resources/{{stage}}/HACk.h1.bed",
         bed2 = f"resources/{{stage}}/HACk.h2.bed"
     output:
@@ -74,12 +58,12 @@ rule generate_bed:
     benchmark:
         f"results/log/generate_bed/{{stage}}.bmk"
     shell:"""
-        sh workflow/scripts/makeBED.sh {CHR} {wildcards.stage} 2>&1 | tee {log}
+        sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} 2>&1 | tee {log}
     """   
 
 rule visor_laser:
     input:
-        fasta = f"resources/genome/{CHR}.fa",
+        fasta = f"resources/genome/{GENOME_FILE}",
         hack_output = f"results/{{stage}}HACk",
         bed = f"results/{{stage}}HACk/laser.simple.bed"
     output:
