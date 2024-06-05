@@ -12,17 +12,6 @@ rule all:
     input:
         [f"results/{stage}LASeR" for stage in STAGE_LIST]
 
-rule get_genome:
-    output:
-        f"resources/genome/{GENOME_FILE}"
-    log:
-        f"results/log/get_genome/{GENOME_FILE}.log"
-    benchmark:
-        f"results/log/get_genome/{GENOME_FILE}.bmk"
-    shell:"""
-        sh workflow/scripts/download.sh {GENOME_URL} resources/genome 2>&1 | tee {log}
-    """
-
 rule visor_hack:
     input:
         fasta = f"resources/genome/{GENOME_FILE}",
@@ -71,7 +60,7 @@ rule visor_laser:
     log:
         f"results/log/visor_laser/{{stage}}.log"
     benchmark:
-        f"results/log/run_visor_laser/{{stage}}.bmk"
+        f"results/log/visor_laser/{{stage}}.bmk"
     conda:
         "envs/visor.yaml"
     params:

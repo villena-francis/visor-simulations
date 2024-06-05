@@ -31,6 +31,19 @@ The setup of the pipeline consists of the modifying the `config.yaml`, setting t
   
 ## Usage
 
+### 0. Get the reference genome
+
+VISOR requires a reference genome to insert structural variations (SVs) and simulate the reads. This genome can be obtained from various sources. A possible method to download and prepare it is described below.
+
+```shell
+#download the human genome from GENCODE
+wget -nc -P resources/genome https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz
+#descompress the file
+gunzip -vk resources/genome/GRCh38.primary_assembly.genome.fa.gz
+#generate a new fasta without unlocalized sequences
+samtools faidx resources/genome/*genome.fa chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY > resources/genome/GRCh38_ref.fa
+```
+
 ### 1. Set up the environment
 
 This pipeline requires a [conda package manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and [bioconda](https://bioconda.github.io/). In addition, of course, it is essential to install [Snakemake](https://snakemake.readthedocs.io/en/stable/index.html); in this case, it has been decided to install it in a Mamba environment. 
