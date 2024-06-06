@@ -1,16 +1,25 @@
 
 configfile: "config/config.yaml"
 
-## Resources
+
 STAGE_LIST = config['stage_list']
+
 GENOME_URL = config['genome_url']
+
 GENOME_FILE = config['genome_file']
 
-# RULES
+
+def get_resource(rule, resource):
+    try:
+        return config["resources"][rule][resource]
+    except KeyError:
+        return config["resources"]["default"][resource]
+
 
 rule all:
     input:
         [f"results/{stage}LASeR" for stage in STAGE_LIST]
+
 
 rule visor_hack:
     input:
@@ -27,12 +36,17 @@ rule visor_hack:
         f"results/log/visor_hack/{{stage}}.log"
     benchmark:
         f"results/log/visor_hack/{{stage}}.bmk"
+    threads: get_resource("visor_hack", "threads")
+    resources:
+        mem_mb=get_resource("visor_hack", "mem_mb"),
+        runtime=get_resource("visor_hack", "runtime")
     conda:
         "envs/visor.yaml"
     shell:"""
         VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} \
         -o {output.folder} 2>&1 | tee {log}
     """
+
 
 rule generate_bed:
     input:
@@ -46,9 +60,14 @@ rule generate_bed:
         f"results/log/generate_bed/{{stage}}.log"
     benchmark:
         f"results/log/generate_bed/{{stage}}.bmk"
+    threads: get_resource("generate_bed", "threads")
+    resources:
+        mem_mb=get_resource("generate_bed", "mem_mb"),
+        runtime=get_resource("generate_bed", "runtime")
     shell:"""
         sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} 2>&1 | tee {log}
     """   
+
 
 rule visor_laser:
     input:
@@ -61,12 +80,15 @@ rule visor_laser:
         f"results/log/visor_laser/{{stage}}.log"
     benchmark:
         f"results/log/visor_laser/{{stage}}.bmk"
+    threads: get_resource("visor_laser", "threads")
+    resources:
+        mem_mb=get_resource("visor_laser", "mem_mb"),
+        runtime=get_resource("visor_laser", "runtime")
     conda:
         "envs/visor.yaml"
     params:
-        threads = 10,
-        coverage = 1,
-        read_type = "nanopore"
+        coverage=config["params", "coverage"],
+        read_type=config["params", "read_type"]
     shell:"""
         VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
         -o {output} --threads {params.threads} --coverage {params.coverage} \
