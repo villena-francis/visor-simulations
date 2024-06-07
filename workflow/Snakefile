@@ -87,10 +87,10 @@ rule visor_laser:
     conda:
         "envs/visor.yaml"
     params:
-        coverage=config["params", "coverage"],
-        read_type=config["params", "read_type"]
+        coverage=config['params']['coverage'],
+        read_type=config['params']['read_type']
     shell:"""
         VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
-        -o {output} --threads {params.threads} --coverage {params.coverage} \
+        -o {output} --threads {threads} --coverage {params.coverage} \
         --fastq --read_type {params.read_type} 2>&1 | tee {log}
     """
