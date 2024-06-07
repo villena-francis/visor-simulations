@@ -8,19 +8,19 @@ resources:
     default:
         threads: 1
         mem_mb: 4000
-        runtime: 30
+        runtime: 1
     visor_hack:
         threads: 24
         mem_mb: 16000
-        runtime: 120   
+        runtime: 5   
     generate_bed:
         threads: 1
         mem_mb: 1000
-        runtime: 30
+        runtime: 1
     visor_laser:
         threads: 48
         mem_mb: 64000
-        runtime: 21600  
+        runtime: 360  
         
 params:       
     coverage: 1
