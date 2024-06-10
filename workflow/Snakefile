@@ -39,7 +39,8 @@ rule visor_hack:
     threads: get_resource("visor_hack", "threads")
     resources:
         mem_mb=get_resource("visor_hack", "mem_mb"),
-        runtime=get_resource("visor_hack", "runtime")
+        runtime=get_resource("visor_hack", "runtime"),
+        slurm_partititon=get_resource("visor_hack", "partition")
     conda:
         "envs/visor.yaml"
     shell:"""
@@ -63,7 +64,8 @@ rule generate_bed:
     threads: get_resource("generate_bed", "threads")
     resources:
         mem_mb=get_resource("generate_bed", "mem_mb"),
-        runtime=get_resource("generate_bed", "runtime")
+        runtime=get_resource("generate_bed", "runtime"),
+        slurm_partititon=get_resource("generate_bed", "partition")
     shell:"""
         sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} 2>&1 | tee {log}
     """   
@@ -83,7 +85,8 @@ rule visor_laser:
     threads: get_resource("visor_laser", "threads")
     resources:
         mem_mb=get_resource("visor_laser", "mem_mb"),
-        runtime=get_resource("visor_laser", "runtime")
+        runtime=get_resource("visor_laser", "runtime"),
+        slurm_partititon=get_resource("visor_laser", "partition")
     conda:
         "envs/visor.yaml"
     params:

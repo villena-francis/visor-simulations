@@ -9,18 +9,22 @@ resources:
         threads: 1
         mem_mb: 4000
         runtime: 1
+        partition: main
     visor_hack:
         threads: 24
         mem_mb: 16000
         runtime: 5   
+        partition: short
     generate_bed:
         threads: 1
         mem_mb: 1000
         runtime: 1
+        partition: short
     visor_laser:
-        threads: 48
-        mem_mb: 64000
-        runtime: 360  
+        threads: 52
+        mem_mb: 364000
+        runtime: 5760  
+        partition: long
         
 params:       
     coverage: 1
