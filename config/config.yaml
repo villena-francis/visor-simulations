@@ -9,7 +9,7 @@ resources:
         threads: 1
         mem_mb: 4000
         runtime: 1
-        partition: main
+        partition: short
     visor_hack:
         threads: 24
         mem_mb: 16000
@@ -25,7 +25,11 @@ resources:
         mem_mb: 364000
         runtime: 5760  
         partition: long
-        
+    sniffles:
+        threads: 8
+        mem_mb: 4000
+        runtime: 20  
+        partition: short
 params:       
-    coverage: 1
+    coverage: 30
     read_type: nanopore

@@ -15,10 +15,9 @@ def get_resource(rule, resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
-
 rule all:
     input:
-        [f"results/{stage}LASeR" for stage in STAGE_LIST]
+        [f"results/{stage}_sniffles" for stage in STAGE_LIST]
 
 
 rule visor_hack:
@@ -27,11 +26,11 @@ rule visor_hack:
         bed1 = f"resources/{{stage}}/HACk.h1.bed",
         bed2 = f"resources/{{stage}}/HACk.h2.bed"
     output:
-        h1_fa = f"results/{{stage}}HACk/h1.fa",
-        h1_fa_fai = f"results/{{stage}}HACk/h1.fa.fai",
-        h2_fa = f"results/{{stage}}HACk/h2.fa",
-        h2_fa_fai = f"results/{{stage}}HACk/h2.fa.fai",
-        folder = directory(f"results/{{stage}}HACk")
+        h1_fa = f"results/{{stage}}_HACk/h1.fa",
+        h1_fa_fai = f"results/{{stage}}_HACk/h1.fa.fai",
+        h2_fa = f"results/{{stage}}_HACk/h2.fa",
+        h2_fa_fai = f"results/{{stage}}_HACk/h2.fa.fai",
+        folder = directory(f"results/{{stage}}_HACk")
     log:
         f"results/log/visor_hack/{{stage}}.log"
     benchmark:
@@ -45,7 +44,7 @@ rule visor_hack:
         "envs/visor.yaml"
     shell:"""
         VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} \
-        -o {output.folder} 2>&1 | tee {log}
+        -o {output.folder} > {log} 2>&1
     """
 
 
@@ -56,7 +55,7 @@ rule generate_bed:
         rules.visor_hack.output.h1_fa_fai,
         rules.visor_hack.output.h2_fa_fai,
     output:
-        f"results/{{stage}}HACk/laser.simple.bed"
+        f"results/{{stage}}_HACk/laser.simple.bed"
     log:
         f"results/log/generate_bed/{{stage}}.log"
     benchmark:
@@ -67,17 +66,18 @@ rule generate_bed:
         runtime=get_resource("generate_bed", "runtime"),
         slurm_partition=get_resource("generate_bed", "partition")
     shell:"""
-        sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} 2>&1 | tee {log}
+        sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} > {log} 2>&1
     """   
 
 
 rule visor_laser:
     input:
         fasta = f"resources/genome/{GENOME_FILE}",
-        hack_output = f"results/{{stage}}HACk",
-        bed = f"results/{{stage}}HACk/laser.simple.bed"
+        hack_output = f"results/{{stage}}_HACk",
+        bed = f"results/{{stage}}_HACk/laser.simple.bed"
     output:
-        directory(f"results/{{stage}}LASeR")
+        bam = f"results/{{stage}}_LASeR/sim.srt.bam",
+        folder = directory(f"results/{{stage}}_LASeR")
     log:
         f"results/log/visor_laser/{{stage}}.log"
     benchmark:
@@ -94,6 +94,29 @@ rule visor_laser:
         read_type=config['params']['read_type']
     shell:"""
         VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
-        -o {output} --threads {threads} --coverage {params.coverage} \
-        --fastq --read_type {params.read_type} 2>&1 | tee {log}
+        -o {output.folder} --threads {threads} --coverage {params.coverage} \
+        --fastq --read_type {params.read_type} > {log} 2>&1
     """
+
+
+rule sniffles:
+    input:
+        bam = f"results/{{stage}}_LASeR/sim.srt.bam"
+    output:
+        directory(f"results/{{stage}}_sniffles"),
+        vcf = f"results/{{stage}}_sniffles/{{stage}}.vcf"
+    log:
+        f"results/log/sniffles/{{stage}}.log"
+    benchmark:
+        f"results/log/sniffles/{{stage}}.bmk"
+    threads: get_resource("sniffles", "threads")
+    resources:
+        mem_mb=get_resource("sniffles", "mem_mb"),
+        runtime=get_resource("sniffles", "runtime"),
+        slurm_partition=get_resource("sniffles", "partition")
+    conda:
+        "envs/sniffles.yaml"
+    shell:"""
+        sniffles -i {input.bam} -v {output.vcf} > {log} 2>&1
+    """
+    
