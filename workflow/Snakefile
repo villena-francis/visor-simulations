@@ -17,7 +17,9 @@ def get_resource(rule, resource):
 
 rule all:
     input:
-        [f"results/{stage}_sniffles" for stage in STAGE_LIST]
+        [f"results/{stage}_sniffles" for stage in STAGE_LIST],
+        [f"results/{stage}_svision" for stage in STAGE_LIST],
+        [f"results/{stage}_severus" for stage in STAGE_LIST]
 
 
 rule visor_hack:
@@ -43,8 +45,11 @@ rule visor_hack:
     conda:
         "envs/visor.yaml"
     shell:"""
-        VISOR HACk -b {input.bed1} {input.bed2} -g {input.fasta} \
-        -o {output.folder} > {log} 2>&1
+        VISOR HACk \
+            -b {input.bed1} {input.bed2} \
+            -g {input.fasta} \
+            -o {output.folder} \
+            > {log} 2>&1
     """
 
 
@@ -66,7 +71,8 @@ rule generate_bed:
         runtime=get_resource("generate_bed", "runtime"),
         slurm_partition=get_resource("generate_bed", "partition")
     shell:"""
-        sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} > {log} 2>&1
+        sh workflow/scripts/makeBED.sh {wildcards.stage} {GENOME_FILE} \
+        > {log} 2>&1
     """   
 
 
@@ -93,9 +99,15 @@ rule visor_laser:
         coverage=config['params']['coverage'],
         read_type=config['params']['read_type']
     shell:"""
-        VISOR LASeR -g {input.fasta} -s {input.hack_output} -b {input.bed} \
-        -o {output.folder} --threads {threads} --coverage {params.coverage} \
-        --fastq --read_type {params.read_type} > {log} 2>&1
+        VISOR LASeR \
+            -g {input.fasta} \
+            -s {input.hack_output} \
+            -b {input.bed} \
+            -o {output.folder} \
+            --threads {threads} \
+            --coverage {params.coverage} \
+            --fastq --read_type {params.read_type} \
+            > {log} 2>&1
     """
 
 
@@ -117,6 +129,72 @@ rule sniffles:
     conda:
         "envs/sniffles.yaml"
     shell:"""
-        sniffles -i {input.bam} -v {output.vcf} > {log} 2>&1
+        sniffles \
+            -i {input.bam} \
+            -v {output.vcf} \
+            > {log} 2>&1
     """
-    
+
+
+rule severus:
+    input:
+        tumor_bam = f"results/{{stage}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_LASeR/sim.srt.bam"
+    output:
+        directory = f"results/{{stage}}_severus"
+    log:
+        f"results/log/severus/{{stage}}.log"
+    benchmark:
+        f"results/log/severus/{{stage}}.bmk"
+    threads: get_resource("severus", "threads")
+    resources:
+        mem_mb=get_resource("severus", "mem_mb"),
+        runtime=get_resource("severus", "runtime"),
+        slurm_partition=get_resource("severus", "partition")
+    conda:
+        "envs/severus.yaml"
+    shell:"""
+        ln -s $(basename {input.tumor_bam}) $(dirname {input.tumor_bam})/tumor.bam
+        ln -s $(basename {input.tumor_bam}).bai $(dirname {input.tumor_bam})/tumor.bam.bai
+        severus \
+            --target-bam $(dirname {input.tumor_bam})/tumor.bam
+            --control-bam {input.normal_bam} \
+            --out-dir {output.directory} \
+            -t {threads} \
+            > {log} 2>&1
+    """
+
+
+rule svision:
+    input:
+        tumor_bam = f"results/{{stage}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_LASeR/sim.srt.bam",
+        fasta = f"resources/genome/{GENOME_FILE}"
+    output:
+        directory = f"results/{{stage}}_svision"
+    log:
+        f"results/log/svision/{{stage}}.log"
+    benchmark:
+        f"results/log/svision/{{stage}}.bmk"
+    threads: get_resource("svision", "threads")
+    resources:
+        mem_mb=get_resource("svision", "mem_mb"),
+        runtime=get_resource("svision", "runtime"),
+        slurm_partition=get_resource("svision", "partition"),
+        slurm_extra=get_resource("svision", "slurm_extra")
+    conda:
+        "svision"
+    params:
+        model=get_resource("svision", "model"),
+        stage= f"{{stage}}"
+    shell:"""
+        SVision-pro 
+            --target_path {input.tumor_bam} \
+            --base_path {input.normal_bam} \
+            --genome_path {input.fasta} \
+            --model_path {params.model} \
+            --out_path {output.directory} \
+            --sample_name {params.stage} \
+            --detect_mode somatic \
+            > {log} 2>&1
+    """
