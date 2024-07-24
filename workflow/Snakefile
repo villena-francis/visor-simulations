@@ -188,7 +188,7 @@ rule svision:
         model=get_resource("svision", "model"),
         stage= f"{{stage}}"
     shell:"""
-        SVision-pro 
+        SVision-pro \
             --target_path {input.tumor_bam} \
             --base_path {input.normal_bam} \
             --genome_path {input.fasta} \

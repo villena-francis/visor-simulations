@@ -30,6 +30,18 @@ resources:
         mem_mb: 4000
         runtime: 20  
         partition: short
+    severus:
+        threads: 24
+        mem_mb: 40000
+        runtime: 120  
+        partition: short
+    svision:
+        threads: 52
+        mem_mb: 40000
+        runtime: 120  
+        partition: gpu
+        slurm_extra: "--gres=gpu:A100:1"
+        model: /home/fvillena/SVision-pro/src/pre_process/model_liteunet_1024_8_16_32_32_32.pth
 params:       
     coverage: 30
     read_type: nanopore
