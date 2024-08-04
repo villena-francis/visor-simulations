@@ -1,0 +1,5 @@
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - severus =1.1
