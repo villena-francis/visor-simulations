@@ -1,9 +1,16 @@
-stage_list: ['trial']
-
 genome_file: "GRCh38_ref.fa"
 
-genome_url: "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz"
+stage_list: ["v1"]
 
+coverage: "30"
+
+replicates: ["A", "B", "C"]
+
+callers: ["sniffles", "severus", "svision", "savana"]
+
+params:       
+    read_type: nanopore
+    
 resources:
     default:
         threads: 1
@@ -23,12 +30,12 @@ resources:
     visor_laser:
         threads: 52
         mem_mb: 364000
-        runtime: 5760  
+        runtime: 10000  
         partition: long
     sniffles:
-        threads: 8
-        mem_mb: 4000
-        runtime: 20  
+        threads: 24
+        mem_mb: 40000
+        runtime: 120  
         partition: short
     severus:
         threads: 24
@@ -38,10 +45,12 @@ resources:
     svision:
         threads: 52
         mem_mb: 40000
-        runtime: 120  
+        runtime: 480  
         partition: gpu
         slurm_extra: "--gres=gpu:A100:1"
         model: /home/fvillena/SVision-pro/src/pre_process/model_liteunet_1024_8_16_32_32_32.pth
-params:       
-    coverage: 30
-    read_type: nanopore
+    savana:
+        threads: 24
+        mem_mb: 40000
+        runtime: 1400  
+        partition: main
