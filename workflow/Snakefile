@@ -241,3 +241,40 @@ rule svision:
             --process_num {threads} \
             > {log} 2>&1
     """
+
+
+rule savana:
+    input:
+        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
+        fasta = f"resources/genome/{GENOME_FILE}"
+    output:
+        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_savana")
+    log:
+        f"results/log/savana/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+    benchmark:
+        f"results/log/savana/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+    threads: get_resource("savana", "threads")
+    resources:
+        mem_mb=get_resource("savana", "mem_mb"),
+        runtime=get_resource("savana", "runtime"),
+        slurm_partition=get_resource("savana", "partition")
+    conda:
+        "envs/savana.yaml"
+    shell:"""
+        ln -sf $(basename {input.tumour_bam}) $(dirname {input.tumour_bam})/tumour.bam
+        ln -sf $(basename {input.tumour_bam}).bai $(dirname {input.tumour_bam})/tumour.bam.bai
+        savana run \
+            --tumour $(dirname {input.tumour_bam})/tumour.bam \
+            --normal {input.normal_bam} \
+            --outdir {output.dir} \
+            --ref {input.fasta} \
+            --threads {threads}
+            > {log} 2>&1
+        savana classify \
+            --vcf {output.dir}/tumour.sv_breakpoints.vcf \
+            --ont \
+            --output {output.dir}/tumour.classified.vcf \
+            --somatic_output {output.dir}/tumour.classified.somatic.vcf \
+            > {log} 2>&1
+    """

@@ -47,3 +47,8 @@ resources:
         partition: gpu
         slurm_extra: "--gres=gpu:A100:1"
         model: /home/fvillena/SVision-pro/src/pre_process/model_liteunet_1024_8_16_32_32_32.pth
+    savana:
+        threads: 24
+        mem_mb: 40000
+        runtime: 1400  
+        partition: main
