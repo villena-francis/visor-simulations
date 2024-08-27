@@ -6,6 +6,8 @@ coverage: "30"
 
 replicates: ["A", "B", "C"]
 
+callers: ["sniffles", "severus", "svision", "savana"]
+
 params:       
     read_type: nanopore
     

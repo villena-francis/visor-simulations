@@ -10,6 +10,8 @@ COVERAGE = config['coverage']
 
 REPLICATES_LIST = config['replicates']
 
+CALLERS_LIST = config['callers']
+
 
 def get_resource(rule, resource):
     try:
@@ -20,9 +22,10 @@ def get_resource(rule, resource):
 
 rule all:
     input:
-        [f"results/{stage}_{COVERAGE}x_{replicate}_sniffles" for stage in STAGE_LIST for replicate in REPLICATES_LIST],
-        [f"results/{stage}_{COVERAGE}x_{replicate}_svision" for stage in STAGE_LIST for replicate in REPLICATES_LIST],
-        [f"results/{stage}_{COVERAGE}x_{replicate}_severus" for stage in STAGE_LIST for replicate in REPLICATES_LIST]
+        [f"results/{stage}_{COVERAGE}x_{replicate}_{caller}" \
+        for stage in STAGE_LIST \
+        for replicate in REPLICATES_LIST \
+        for caller in CALLERS_LIST]
 
 
 rule visor_hack:
@@ -276,5 +279,5 @@ rule savana:
             --ont \
             --output {output.dir}/tumour.classified.vcf \
             --somatic_output {output.dir}/tumour.classified.somatic.vcf \
-            > {log} 2>&1
+            >> {log} 2>&1
     """
