@@ -178,7 +178,7 @@ rule sniffles:
 
 rule severus:
     input:
-        tumor_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
         normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam"
     output:
         dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_severus")
@@ -194,10 +194,10 @@ rule severus:
     conda:
         "envs/severus.yaml"
     shell:"""
-        ln -sf $(basename {input.tumor_bam}) $(dirname {input.tumor_bam})/tumor.bam
-        ln -sf $(basename {input.tumor_bam}).bai $(dirname {input.tumor_bam})/tumor.bam.bai
+        ln -sf $(basename {input.tumour_bam}) $(dirname {input.tumour_bam})/tumour.bam
+        ln -sf $(basename {input.tumour_bam}).bai $(dirname {input.tumour_bam})/tumour.bam.bai
         severus \
-            --target-bam $(dirname {input.tumor_bam})/tumor.bam \
+            --target-bam $(dirname {input.tumour_bam})/tumour.bam \
             --control-bam {input.normal_bam} \
             --out-dir {output.dir} \
             -t {threads} \
@@ -207,7 +207,7 @@ rule severus:
 
 rule svision:
     input:
-        tumor_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
         normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
         fasta = f"resources/genome/{GENOME_FILE}"
     output:
@@ -228,10 +228,10 @@ rule svision:
         model=get_resource("svision", "model"),
         stage= f"{{stage}}"
     shell:"""
-        ln -sf $(basename {input.tumor_bam}) $(dirname {input.tumor_bam})/tumor.bam
-        ln -sf $(basename {input.tumor_bam}).bai $(dirname {input.tumor_bam})/tumor.bam.bai
+        ln -sf $(basename {input.tumour_bam}) $(dirname {input.tumour_bam})/tumour.bam
+        ln -sf $(basename {input.tumour_bam}).bai $(dirname {input.tumour_bam})/tumour.bam.bai
         SVision-pro \
-            --target_path $(dirname {input.tumor_bam})/tumor.bam \
+            --target_path $(dirname {input.tumour_bam})/tumour.bam \
             --base_path {input.normal_bam} \
             --genome_path {input.fasta} \
             --model_path {params.model} \
