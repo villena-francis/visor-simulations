@@ -2,11 +2,13 @@
 configfile: "config/config.yaml"
 
 
+GENOME_FILE = config['genome_file']
+
 STAGE_LIST = config['stage_list']
 
-GENOME_URL = config['genome_url']
+COVERAGE = config['coverage']
 
-GENOME_FILE = config['genome_file']
+REPLICATES_LIST = config['replicates']
 
 
 def get_resource(rule, resource):
@@ -15,11 +17,12 @@ def get_resource(rule, resource):
     except KeyError:
         return config["resources"]["default"][resource]
 
+
 rule all:
     input:
-        [f"results/{stage}_sniffles" for stage in STAGE_LIST],
-        [f"results/{stage}_svision" for stage in STAGE_LIST],
-        [f"results/{stage}_severus" for stage in STAGE_LIST]
+        [f"results/{stage}_{COVERAGE}x_{replicate}_sniffles" for stage in STAGE_LIST for replicate in REPLICATES_LIST],
+        [f"results/{stage}_{COVERAGE}x_{replicate}_svision" for stage in STAGE_LIST for replicate in REPLICATES_LIST],
+        [f"results/{stage}_{COVERAGE}x_{replicate}_severus" for stage in STAGE_LIST for replicate in REPLICATES_LIST]
 
 
 rule visor_hack:
@@ -76,18 +79,18 @@ rule generate_bed:
     """   
 
 
-rule visor_laser:
+rule visor_laser_tumour:
     input:
         fasta = f"resources/genome/{GENOME_FILE}",
         hack_output = f"results/{{stage}}_HACk",
         bed = f"results/{{stage}}_HACk/laser.simple.bed"
     output:
-        bam = f"results/{{stage}}_LASeR/sim.srt.bam",
-        folder = directory(f"results/{{stage}}_LASeR")
+        bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        folder = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR")
     log:
-        f"results/log/visor_laser/{{stage}}.log"
+        f"results/log/visor_laser/{{stage}}_{COVERAGE}x_{{replicate}}.log"
     benchmark:
-        f"results/log/visor_laser/{{stage}}.bmk"
+        f"results/log/visor_laser/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
     threads: get_resource("visor_laser", "threads")
     resources:
         mem_mb=get_resource("visor_laser", "mem_mb"),
@@ -96,7 +99,6 @@ rule visor_laser:
     conda:
         "envs/visor.yaml"
     params:
-        coverage=config['params']['coverage'],
         read_type=config['params']['read_type']
     shell:"""
         VISOR LASeR \
@@ -105,7 +107,41 @@ rule visor_laser:
             -b {input.bed} \
             -o {output.folder} \
             --threads {threads} \
-            --coverage {params.coverage} \
+            --coverage {COVERAGE} \
+            --fastq --read_type {params.read_type} \
+            > {log} 2>&1
+    """
+
+
+rule visor_laser_normal:
+    input:
+        fasta = f"resources/genome/{GENOME_FILE}",
+        hack_output = f"results/normal_HACk",
+        bed = f"results/normal_HACk/laser.simple.bed"
+    output:
+        bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
+        folder = directory(f"results/normal_{COVERAGE}x_LASeR")
+    log:
+        f"results/log/visor_laser/normal_{COVERAGE}x.log"
+    benchmark:
+        f"results/log/visor_laser/normal_{COVERAGE}x.bmk"
+    threads: get_resource("visor_laser", "threads")
+    resources:
+        mem_mb=get_resource("visor_laser", "mem_mb"),
+        runtime=get_resource("visor_laser", "runtime"),
+        slurm_partition=get_resource("visor_laser", "partition")
+    conda:
+        "envs/visor.yaml"
+    params:
+        read_type=config['params']['read_type']
+    shell:"""
+        VISOR LASeR \
+            -g {input.fasta} \
+            -s {input.hack_output} \
+            -b {input.bed} \
+            -o {output.folder} \
+            --threads {threads} \
+            --coverage {COVERAGE} \
             --fastq --read_type {params.read_type} \
             > {log} 2>&1
     """
@@ -113,14 +149,15 @@ rule visor_laser:
 
 rule sniffles:
     input:
-        bam = f"results/{{stage}}_LASeR/sim.srt.bam"
+        bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        fasta = f"resources/genome/{GENOME_FILE}"
     output:
-        directory(f"results/{{stage}}_sniffles"),
-        vcf = f"results/{{stage}}_sniffles/{{stage}}.vcf"
+        directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_sniffles"),
+        vcf = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_sniffles/{{stage}}.vcf"
     log:
-        f"results/log/sniffles/{{stage}}.log"
+        f"results/log/sniffles/{{stage}}_{COVERAGE}x_{{replicate}}.log"
     benchmark:
-        f"results/log/sniffles/{{stage}}.bmk"
+        f"results/log/sniffles/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
     threads: get_resource("sniffles", "threads")
     resources:
         mem_mb=get_resource("sniffles", "mem_mb"),
@@ -132,20 +169,23 @@ rule sniffles:
         sniffles \
             -i {input.bam} \
             -v {output.vcf} \
+            -t {threads} \
+            --reference {input.fasta} \
+            --mosaic \
             > {log} 2>&1
     """
 
 
 rule severus:
     input:
-        tumor_bam = f"results/{{stage}}_LASeR/sim.srt.bam",
-        normal_bam = f"results/normal_LASeR/sim.srt.bam"
+        tumor_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam"
     output:
-        dir = directory(f"results/{{stage}}_severus")
+        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_severus")
     log:
-        f"results/log/severus/{{stage}}.log"
+        f"results/log/severus/{{stage}}_{COVERAGE}x_{{replicate}}.log"
     benchmark:
-        f"results/log/severus/{{stage}}.bmk"
+        f"results/log/severus/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
     threads: get_resource("severus", "threads")
     resources:
         mem_mb=get_resource("severus", "mem_mb"),
@@ -167,15 +207,15 @@ rule severus:
 
 rule svision:
     input:
-        tumor_bam = f"results/{{stage}}_LASeR/sim.srt.bam",
-        normal_bam = f"results/normal_LASeR/sim.srt.bam",
+        tumor_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
         fasta = f"resources/genome/{GENOME_FILE}"
     output:
-        dir = directory(f"results/{{stage}}_svision")
+        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_svision")
     log:
-        f"results/log/svision/{{stage}}.log"
+        f"results/log/svision/{{stage}}_{COVERAGE}x_{{replicate}}.log"
     benchmark:
-        f"results/log/svision/{{stage}}.bmk"
+        f"results/log/svision/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
     threads: get_resource("svision", "threads")
     resources:
         mem_mb=get_resource("svision", "mem_mb"),
@@ -198,5 +238,6 @@ rule svision:
             --out_path {output.dir} \
             --sample_name {params.stage} \
             --detect_mode somatic \
+            --process_num {threads} \
             > {log} 2>&1
     """
