@@ -10,6 +10,8 @@ resources/genome/**
 !resources/normal/**
 !resources/v1/
 !resources/v1/**
+!resources/fig/
+!resources/fig/**
 
 results/**
 !results/log/
