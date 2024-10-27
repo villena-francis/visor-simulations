@@ -4,6 +4,8 @@ resources/genome/**
 !resources/genome/url
 !resources/trial/
 !resources/trial/**
+!severus_vntrs/
+!severus_vntrs/**
 
 results/**
 !results/log/
