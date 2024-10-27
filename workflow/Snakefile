@@ -22,8 +22,9 @@ def get_resource(rule, resource):
 
 rule all:
     input:
-        [f"results/{stage}_{COVERAGE}x_{replicate}_{caller}" \
+        [f"results/{stage}_{coverage}x_{replicate}_{caller}" \
         for stage in STAGE_LIST \
+        for coverage in COVERAGE \
         for replicate in REPLICATES_LIST \
         for caller in CALLERS_LIST]
 
@@ -88,12 +89,12 @@ rule visor_laser_tumour:
         hack_output = f"results/{{stage}}_HACk",
         bed = f"results/{{stage}}_HACk/laser.simple.bed"
     output:
-        bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
-        folder = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR")
+        bam = f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR/sim.srt.bam",
+        folder = directory(f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR")
     log:
-        f"results/log/visor_laser/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+        f"results/log/visor_laser/{{stage}}_{{coverage}}x_{{replicate}}.log"
     benchmark:
-        f"results/log/visor_laser/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+        f"results/log/visor_laser/{{stage}}_{{coverage}}x_{{replicate}}.bmk"
     threads: get_resource("visor_laser", "threads")
     resources:
         mem_mb=get_resource("visor_laser", "mem_mb"),
@@ -110,7 +111,7 @@ rule visor_laser_tumour:
             -b {input.bed} \
             -o {output.folder} \
             --threads {threads} \
-            --coverage {COVERAGE} \
+            --coverage {wildcards.coverage} \
             --fastq --read_type {params.read_type} \
             > {log} 2>&1
     """
@@ -122,12 +123,12 @@ rule visor_laser_normal:
         hack_output = f"results/normal_HACk",
         bed = f"results/normal_HACk/laser.simple.bed"
     output:
-        bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
-        folder = directory(f"results/normal_{COVERAGE}x_LASeR")
+        bam = f"results/normal_{{coverage}}x_LASeR/sim.srt.bam",
+        folder = directory(f"results/normal_{{coverage}}x_LASeR")
     log:
-        f"results/log/visor_laser/normal_{COVERAGE}x.log"
+        f"results/log/visor_laser/normal_{{coverage}}x.log"
     benchmark:
-        f"results/log/visor_laser/normal_{COVERAGE}x.bmk"
+        f"results/log/visor_laser/normal_{{coverage}}x.bmk"
     threads: get_resource("visor_laser", "threads")
     resources:
         mem_mb=get_resource("visor_laser", "mem_mb"),
@@ -144,7 +145,7 @@ rule visor_laser_normal:
             -b {input.bed} \
             -o {output.folder} \
             --threads {threads} \
-            --coverage {COVERAGE} \
+            --coverage {wildcards.coverage} \
             --fastq --read_type {params.read_type} \
             > {log} 2>&1
     """
@@ -152,15 +153,15 @@ rule visor_laser_normal:
 
 rule sniffles:
     input:
-        bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
+        bam = f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR/sim.srt.bam",
         fasta = f"resources/genome/{GENOME_FILE}"
     output:
-        directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_sniffles"),
-        vcf = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_sniffles/{{stage}}.vcf"
+        directory(f"results/{{stage}}_{{coverage}}x_{{replicate}}_sniffles"),
+        vcf = f"results/{{stage}}_{{coverage}}x_{{replicate}}_sniffles/{{stage}}.vcf"
     log:
-        f"results/log/sniffles/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+        f"results/log/sniffles/{{stage}}_{{coverage}}x_{{replicate}}.log"
     benchmark:
-        f"results/log/sniffles/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+        f"results/log/sniffles/{{stage}}_{{coverage}}x_{{replicate}}.bmk"
     threads: get_resource("sniffles", "threads")
     resources:
         mem_mb=get_resource("sniffles", "mem_mb"),
@@ -181,14 +182,14 @@ rule sniffles:
 
 rule severus:
     input:
-        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
-        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam"
+        tumour_bam = f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{{coverage}}x_LASeR/sim.srt.bam"
     output:
-        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_severus")
+        dir = directory(f"results/{{stage}}_{{coverage}}x_{{replicate}}_severus")
     log:
-        f"results/log/severus/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+        f"results/log/severus/{{stage}}_{{coverage}}x_{{replicate}}.log"
     benchmark:
-        f"results/log/severus/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+        f"results/log/severus/{{stage}}_{{coverage}}x_{{replicate}}.bmk"
     threads: get_resource("severus", "threads")
     resources:
         mem_mb=get_resource("severus", "mem_mb"),
@@ -196,6 +197,8 @@ rule severus:
         slurm_partition=get_resource("severus", "partition")
     conda:
         "envs/severus.yaml"
+    params:
+        vntrs=config['params']['vntrs']
     shell:"""
         ln -sf $(basename {input.tumour_bam}) $(dirname {input.tumour_bam})/tumour.bam
         ln -sf $(basename {input.tumour_bam}).bai $(dirname {input.tumour_bam})/tumour.bam.bai
@@ -203,6 +206,7 @@ rule severus:
             --target-bam $(dirname {input.tumour_bam})/tumour.bam \
             --control-bam {input.normal_bam} \
             --out-dir {output.dir} \
+            --vntr-bed {params.vntrs} \
             -t {threads} \
             > {log} 2>&1
     """
@@ -210,15 +214,15 @@ rule severus:
 
 rule svision:
     input:
-        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
-        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
+        tumour_bam = f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{{coverage}}x_LASeR/sim.srt.bam",
         fasta = f"resources/genome/{GENOME_FILE}"
     output:
-        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_svision")
+        dir = directory(f"results/{{stage}}_{{coverage}}x_{{replicate}}_svision")
     log:
-        f"results/log/svision/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+        f"results/log/svision/{{stage}}_{{coverage}}x_{{replicate}}.log"
     benchmark:
-        f"results/log/svision/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+        f"results/log/svision/{{stage}}_{{coverage}}x_{{replicate}}.bmk"
     threads: get_resource("svision", "threads")
     resources:
         mem_mb=get_resource("svision", "mem_mb"),
@@ -248,15 +252,15 @@ rule svision:
 
 rule savana:
     input:
-        tumour_bam = f"results/{{stage}}_{COVERAGE}x_{{replicate}}_LASeR/sim.srt.bam",
-        normal_bam = f"results/normal_{COVERAGE}x_LASeR/sim.srt.bam",
+        tumour_bam = f"results/{{stage}}_{{coverage}}x_{{replicate}}_LASeR/sim.srt.bam",
+        normal_bam = f"results/normal_{{coverage}}x_LASeR/sim.srt.bam",
         fasta = f"resources/genome/{GENOME_FILE}"
     output:
-        dir = directory(f"results/{{stage}}_{COVERAGE}x_{{replicate}}_savana")
+        dir = directory(f"results/{{stage}}_{{coverage}}x_{{replicate}}_savana")
     log:
-        f"results/log/savana/{{stage}}_{COVERAGE}x_{{replicate}}.log"
+        f"results/log/savana/{{stage}}_{{coverage}}x_{{replicate}}.log"
     benchmark:
-        f"results/log/savana/{{stage}}_{COVERAGE}x_{{replicate}}.bmk"
+        f"results/log/savana/{{stage}}_{{coverage}}x_{{replicate}}.bmk"
     threads: get_resource("savana", "threads")
     resources:
         mem_mb=get_resource("savana", "mem_mb"),
