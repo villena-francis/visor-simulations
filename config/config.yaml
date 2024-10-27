@@ -11,6 +11,7 @@ callers: ["sniffles", "severus", "svision", "savana"]
 params:       
     read_type: nanopore
     vntrs: /storage/scratch01/groups/bu/simSVs/visor-simulations/resources/severus_vntrs/human_GRCh38_no_alt_analysis_set.trf.bed
+    
 resources:
     default:
         threads: 1

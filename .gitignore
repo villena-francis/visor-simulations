@@ -6,6 +6,10 @@ resources/genome/**
 !resources/trial/**
 !severus_vntrs/
 !severus_vntrs/**
+!resources/normal/
+!resources/normal/**
+!resources/v1/
+!resources/v1/**
 
 results/**
 !results/log/
