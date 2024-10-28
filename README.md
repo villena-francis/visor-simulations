@@ -34,14 +34,6 @@ This is a simplified diagram of the workflow steps:
   <img src="resources/fig/overview.png" alt="Descripción de la imagen">
 </p>
 
-## Setup
-
-The setup of the workflow consists of the modifying the `config.yaml`, setting 
-the desired parameters and provide the following **input files**:
-
-* [**Reference genome**](#reference-genome) used as a template to insert the SVs and generate reads
-* [**BAM instruction files**](#bam-instruction-files) for generating SVs 
-
 ## Usage
 
 ### 1. Download visor-simulations from GitHub
