@@ -11,14 +11,13 @@ low-cost and accurate estimation of the precision and recall of SV calling metho
 **[Severus](https://github.com/KolmogorovLab/Severus)**, 
 **[Sniffles2](https://github.com/fritzsedlazeck/Sniffles)** 
 and **[SVision-pro](https://github.com/songbowang125/SVision-pro)**). The use of 
-the software tools described herein is focused on my **[master's thesis
+the software tools described herein is based on my **[master's thesis
 in bioinformatics](https://github.com/my/master/thesis)**. However, alternative 
 and more complex configurations are possible.
 
 The workflow leverages Snakemake's integration with the Conda package manager to 
-automatically manage software requirements and dependencies, and uses the Slurm 
-workload manager to efficiently allocate resources for each job. **This 
-workflow is designed for use on an HPC cluster and is not recommended for 
+automatically manage software requirements and dependencies. **It 
+is designed for use on an HPC system and is not recommended for 
 laptops or workstations**, as VISOR-LASeR requires significant CPU and RAM 
 resources, and the generated long-read sequencing data files (BAM and FASTQ) 
 demand substantial storage space.
@@ -57,7 +56,7 @@ git clone https://github.com/villena-francis/visor-simulations
 
 This pipeline requires a [conda package manager](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and [bioconda](https://bioconda.github.io/). It is also essential to 
 install [Snakemake](https://snakemake.readthedocs.io/en/stable/index.html), 
-which in this case, will be set up in a Mamba environment. 
+which in this case, will be set up in a Conda environment. 
 
 > Using a Snakemake environment ensures working with a fixed version, preventing
 > potential issues when re-running the pipeline after general software updates.
@@ -66,7 +65,7 @@ which in this case, will be set up in a Mamba environment.
 # Navigate to the visor-simulations directory
 cd /path/to/visor-simulations
 # Create the environment
-mamba env create -f workflow/envs/snakemake_visor.yaml
+conda env create -f workflow/envs/snakemake_visor.yaml
 ```
 
 ### 3. Get the input files
@@ -75,7 +74,7 @@ mamba env create -f workflow/envs/snakemake_visor.yaml
 
 VISOR-HACk requires a reference genome to insert structural variations (SVs) and 
 simulate reads. This genome should be placed in the `resources/genome/` directory. 
-You can obtain the genome from various sources.A possible method to download and 
+You can obtain the genome from various sources. A possible method to download and 
 prepare it is described below.
 
 ```shell
@@ -127,8 +126,8 @@ few minutes to set up Conda dependencies.
 # Navigate to the visor-simulations directory
 cd /path/to/visor-simulations
 # Activate the environment
-mamba activate snakemake_visor
-# Run the workflow
+conda activate snakemake_visor
+# Run the workflow (example with the Slurm workload manager)
 snakemake --use-conda -j unlimited --executor slurm
 ```
 
