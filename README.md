@@ -12,7 +12,7 @@ low-cost and accurate estimation of the precision and recall of SV calling metho
 **[Sniffles2](https://github.com/fritzsedlazeck/Sniffles)** 
 and **[SVision-pro](https://github.com/songbowang125/SVision-pro)**). The use of 
 the software tools described herein is based on my **[master's thesis
-in bioinformatics](https://github.com/my/master/thesis)**. However, alternative 
+in bioinformatics](https://github.com/villena-francis/master_thesis)**. However, alternative 
 and more complex configurations are possible.
 
 The workflow leverages Snakemake's integration with the Conda package manager to 
