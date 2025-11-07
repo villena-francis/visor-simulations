@@ -34,7 +34,7 @@ This is a simplified diagram of the workflow steps:
     <picture>
     <source media="(prefers-color-scheme: dark)" srcset="resources/fig/overview_dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="resources/fig/overview_light.svg">
-    <img alt="Fallback image description" src="resources/fig/overview.png", width = 70%>
+    <img alt="Fallback image description" src="resources/fig/overview.png", width = 50%>
     </picture>
 </p>
 
