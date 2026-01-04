@@ -112,7 +112,8 @@ rule visor_laser_tumour:
             -o {output.folder} \
             --threads {threads} \
             --coverage {wildcards.coverage} \
-            --fastq --read_type {params.read_type} \
+            --fastq --compress \
+            --read_type {params.read_type} \
             > {log} 2>&1
     """
 
@@ -146,7 +147,8 @@ rule visor_laser_normal:
             -o {output.folder} \
             --threads {threads} \
             --coverage {wildcards.coverage} \
-            --fastq --read_type {params.read_type} \
+            --fastq -compress \
+            --read_type {params.read_type} \
             > {log} 2>&1
     """
 
