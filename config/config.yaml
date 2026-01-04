@@ -1,8 +1,9 @@
-genome_file: "GRCh38_ref.fa"
+# genome_file: "GRCh38_ref.fa"
+genome_file: "chm13v2.0_maskedY_rCRS.fa"
 
 stage_list: ["v1"]
 
-coverage: "30"
+coverage: "40"
 
 length: "15000"
 
@@ -12,8 +13,9 @@ callers: ["sniffles", "severus", "svision", "savana"]
 
 params:       
     read_type: nanopore
-    vntrs: /storage/scratch01/groups/bu/simSVs/visor-simulations/resources/severus_vntrs/human_GRCh38_no_alt_analysis_set.trf.bed
-    
+    # vntrs: /storage/scratch01/groups/bu/simSVs/visor-simulations/resources/severus_vntrs/human_GRCh38_no_alt_analysis_set.trf.bed
+    vntrs: /storage/scratch01/groups/bu/simSVs/tfe_unir/visor-simulations/resources/severus_vntrs/human_chm13v2.0_maskedY_rCRS.trf.bed
+
 resources:
     default:
         threads: 1

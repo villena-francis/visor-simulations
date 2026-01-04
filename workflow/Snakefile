@@ -236,7 +236,7 @@ rule svision:
         slurm_partition=get_resource("svision", "partition"),
         slurm_extra=get_resource("svision", "slurm_extra")
     conda:
-        "envs/svision-pro"
+        "envs/svision-pro.yaml"
     params:
         model=get_resource("svision", "model"),
         stage= f"{{stage}}"
