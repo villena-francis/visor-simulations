@@ -8,6 +8,8 @@ STAGE_LIST = config['stage_list']
 
 COVERAGE = config['coverage']
 
+LENGTH = config['length']
+
 REPLICATES_LIST = config['replicates']
 
 CALLERS_LIST = config['callers']
@@ -112,6 +114,7 @@ rule visor_laser_tumour:
             -o {output.folder} \
             --threads {threads} \
             --coverage {wildcards.coverage} \
+            --length_mean {wildcards.length} \
             --fastq --compress \
             --read_type {params.read_type} \
             > {log} 2>&1
@@ -147,6 +150,7 @@ rule visor_laser_normal:
             -o {output.folder} \
             --threads {threads} \
             --coverage {wildcards.coverage} \
+            --length_mean {wildcards.length}
             --fastq -compress \
             --read_type {params.read_type} \
             > {log} 2>&1

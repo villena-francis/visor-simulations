@@ -4,6 +4,8 @@ stage_list: ["v1"]
 
 coverage: "30"
 
+length: "15000"
+
 replicates: ["A", "B", "C"]
 
 callers: ["sniffles", "severus", "svision", "savana"]
