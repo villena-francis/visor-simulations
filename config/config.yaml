@@ -3,9 +3,9 @@ genome_file: "chm13v2.0_maskedY_rCRS.fa"
 
 stage_list: ["v1"]
 
-coverage: "40"
+coverage: ["40"]
 
-length: "15000"
+length: ["15000", "30000", "50000", "100000"]
 
 replicates: ["A", "B", "C"]
 
@@ -37,6 +37,7 @@ resources:
         mem_mb: 364000
         runtime: 10000  
         partition: long
+        slurm_extra: "--qos=long4"
     sniffles:
         threads: 24
         mem_mb: 40000
