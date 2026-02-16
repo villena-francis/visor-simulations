@@ -2,4 +2,4 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - severus =1.2
+    - severus=1.6

@@ -1,7 +1,7 @@
-name: sniffles
+name: svision-pro
 channels:
   - conda-forge
   - bioconda
   - nodefaults
 dependencies:
-  - sniffles=2.7.2
+  - svision-pro=2.5

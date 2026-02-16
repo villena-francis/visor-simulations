@@ -4,4 +4,4 @@ channels:
   - bioconda
   - nodefaults
 dependencies:
-  - visor=1.1.2.1=pyh7cba7a3_0
+  - visor=1.1.2.1

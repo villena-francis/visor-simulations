@@ -76,12 +76,22 @@ prepare it is described below.
 ```shell
 # Navigate to the visor-simulations directory
 cd /path/to/visor-simulations
-# Download the human genome from GENCODE
+
+# A. Use the GRCh38 reference
+## Download the human genome
 wget -nc -P resources/genome https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_46/GRCh38.primary_assembly.genome.fa.gz
-# Descompress the file
+## Descompress the file
 gunzip -vk resources/genome/GRCh38.primary_assembly.genome.fa.gz
-# Generate a new fasta without unlocalized sequences
+## Generate a new fasta without unlocalized sequences
 samtools faidx resources/genome/*genome.fa chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY > resources/genome/GRCh38_ref.fa
+
+# B. Use the T2T reference
+## Download the human genome
+wget https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0_maskedY_rCRS.fa.gz
+## Descompress the file
+gunzip -vk resources/genome/chm13v2.0_maskedY_rCRS.fa.gz
+## Generate index
+samtools faidx chm13v2.0_maskedY_rCRS.fa.gz
 ```
 
 #### BAM instruction files
